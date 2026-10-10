@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario Petrolero</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .contenedor {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            color: #17365d;
+        }
+
+        .indicadores {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .indicador {
+            flex: 1;
+            background: #eef3f8;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .indicador strong {
+            display: block;
+            font-size: 28px;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+        }
+
+        .alerta {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .disponible {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .boton {
+            display: inline-block;
+            background: #17365d;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Sistema de Gestión de Inventario Petrolero</h1>
+    <p>Control de materiales y equipos para operaciones petroleras.</p>
+
+    <div class="indicadores">
+        <div class="indicador">
+            Total de materiales
+            <strong th:text="${#lists.size(productos)}">0</strong>
+        </div>
+
+        <div class="indicador">
+            Materiales con stock bajo
+            <strong th:text="${#lists.size(stockBajo)}">0</strong>
+        </div>
+    </div>
+
+    <a class="boton" th:href="@{/productos/nuevo}">
+        + Registrar material
+    </a>
+
+    <h2>Listado de materiales</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Código</th>
+            <th>Material</th>
+            <th>Categoría</th>
+            <th>Cantidad</th>
+            <th>Stock mínimo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="producto : ${productos}">
+            <td th:text="${producto.codigo}"></td>
+            <td th:text="${producto.nombre}"></td>
+            <td th:text="${producto.categoria}"></td>
+            <td th:text="${producto.cantidad}"></td>
+            <td th:text="${producto.stockMinimo}"></td>
+
+            <td>
+                <span class="alerta"
+                      th:if="${producto.cantidad <= producto.stockMinimo}">
+                    Stock bajo
+                </span>
+
+                <span class="disponible"
+                      th:if="${producto.cantidad > producto.stockMinimo}">
+                    Disponible
+                </span>
+            </td>
+
+            <td>
+                <div class="acciones">
+                    <a th:href="@{/productos/editar/{id}(id=${producto.id})}">
+                        Editar
+                    </a>
+
+                    <form th:action="@{/productos/eliminar/{id}(id=${producto.id})}"
+                          method="post">
+                        <button type="submit"
+                                onclick="return confirm('¿Eliminar este material?')">
+                            Eliminar
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(productos)}">
+            <td colspan="7">
+                No existen materiales registrados.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
+

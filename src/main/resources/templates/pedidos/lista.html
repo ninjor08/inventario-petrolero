@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Pedidos - Inventario Petrolero</title>
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f3f5f7;
+        margin: 0;
+        padding: 40px;
+    }
+
+    .contenedor {
+        max-width: 1350px;
+        margin: auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+    }
+
+    h1 {
+        color: #19375d;
+    }
+
+    .boton {
+        display: inline-block;
+        background-color: #19375d;
+        color: white;
+        padding: 12px 18px;
+        text-decoration: none;
+        border-radius: 4px;
+        margin: 15px 5px 15px 0;
+    }
+
+    .boton:hover {
+        background-color: #102843;
+    }
+
+    .tabla-contenedor {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th {
+        background-color: #19375d;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: middle;
+    }
+
+    tbody tr:hover {
+        background-color: #f3f5f7;
+    }
+
+    .pendiente {
+        color: #c47b00;
+        font-weight: bold;
+    }
+
+    .aprobado {
+        color: green;
+        font-weight: bold;
+    }
+
+    .entregado {
+        color: #1565c0;
+        font-weight: bold;
+    }
+
+    .cancelado {
+        color: #c62828;
+        font-weight: bold;
+    }
+
+    .sin-material {
+        color: #777;
+        font-style: italic;
+    }
+
+    .cantidad {
+        font-weight: bold;
+        color: #19375d;
+    }
+
+    .mensaje {
+        background-color: #e8f5e9;
+        color: #256029;
+        padding: 13px;
+        border-radius: 5px;
+        margin: 15px 0;
+    }
+
+    .mensaje-error {
+        background-color: #fdecea;
+        color: #b71c1c;
+        padding: 13px;
+        border-radius: 5px;
+        margin: 15px 0;
+    }
+
+    .acciones {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-width: 130px;
+    }
+
+    .acciones form {
+        margin: 0;
+    }
+
+    .acciones button {
+        width: 100%;
+        padding: 9px 12px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .btn-aprobar {
+        background-color: #2e7d32;
+    }
+
+    .btn-entregar {
+        background-color: #1565c0;
+    }
+
+    .btn-cancelar {
+        background-color: #c62828;
+    }
+
+    .acciones button:hover {
+        opacity: 0.85;
+    }
+
+    .sin-acciones {
+        color: #777;
+        font-style: italic;
+        font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+  <h1>Gestión de pedidos de materiales</h1>
+
+  <p>
+    Registro y seguimiento de solicitudes
+    para operaciones petroleras.
+  </p>
+
+  <!-- NAVEGACIÓN -->
+  <a class="boton" th:href="@{/pedidos/nuevo}">
+    + Registrar pedido
+  </a>
+
+  <a class="boton" th:href="@{/productos}">
+    Ver inventario
+  </a>
+
+  <!-- MENSAJES -->
+  <div class="mensaje"
+       th:if="${mensaje}"
+       th:text="${mensaje}">
+  </div>
+
+  <div class="mensaje-error"
+       th:if="${error}"
+       th:text="${error}">
+  </div>
+
+  <h2>Listado de pedidos</h2>
+
+  <div class="tabla-contenedor">
+
+    <table>
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Solicitante</th>
+        <th>Área de trabajo</th>
+        <th>Fecha</th>
+        <th>Material solicitado</th>
+        <th>Cantidad solicitada</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <tr th:if="${#lists.isEmpty(pedidos)}">
+        <td colspan="8">
+          No existen pedidos registrados.
+        </td>
+      </tr>
+
+      <tr th:each="pedido : ${pedidos}">
+
+        <td th:text="${pedido.id}"></td>
+
+        <td th:text="${pedido.solicitante}"></td>
+
+        <td th:text="${pedido.areaTrabajo}"></td>
+
+        <td th:text="${pedido.fechaPedido}"></td>
+
+        <!-- MATERIAL -->
+        <td>
+          <div th:if="${pedido.detalles != null
+                                 and !pedido.detalles.isEmpty()}">
+
+            <div th:each="detalle : ${pedido.detalles}">
+
+                            <span th:if="${detalle.producto != null}"
+                                  th:text="${detalle.producto.codigo
+                                  + ' - ' + detalle.producto.nombre}">
+                            </span>
+
+            </div>
+          </div>
+
+          <span class="sin-material"
+                th:if="${pedido.detalles == null
+                                  or pedido.detalles.isEmpty()}">
+                        Sin material registrado
+                    </span>
+        </td>
+
+        <!-- CANTIDAD -->
+        <td>
+          <div th:if="${pedido.detalles != null
+                                 and !pedido.detalles.isEmpty()}">
+
+            <div th:each="detalle : ${pedido.detalles}">
+
+                            <span class="cantidad"
+                                  th:text="${detalle.cantidad}">
+                            </span>
+
+              <span> unidades</span>
+
+            </div>
+          </div>
+
+          <span class="sin-material"
+                th:if="${pedido.detalles == null
+                                  or pedido.detalles.isEmpty()}">
+                        -
+                    </span>
+        </td>
+
+        <!-- ESTADO -->
+        <td th:text="${pedido.estado}"
+            th:classappend="${pedido.estado == 'Pendiente'}
+                        ? 'pendiente'
+                        : (${pedido.estado == 'Aprobado'}
+                        ? 'aprobado'
+                        : (${pedido.estado == 'Entregado'}
+                        ? 'entregado'
+                        : (${pedido.estado == 'Cancelado'}
+                        ? 'cancelado' : '')))">
+        </td>
+
+        <!-- ACCIONES -->
+        <td>
+          <div class="acciones">
+
+            <!-- APROBAR -->
+            <form th:if="${pedido.estado == 'Pendiente'}"
+                  th:action="@{/pedidos/{id}/estado(id=${pedido.id})}"
+                  method="post">
+
+              <input type="hidden"
+                     name="estado"
+                     value="Aprobado">
+
+              <button class="btn-aprobar"
+                      type="submit">
+                Aprobar
+              </button>
+            </form>
+
+            <!-- ENTREGAR -->
+            <form th:if="${pedido.estado == 'Aprobado'}"
+                  th:action="@{/pedidos/{id}/estado(id=${pedido.id})}"
+                  method="post">
+
+              <input type="hidden"
+                     name="estado"
+                     value="Entregado">
+
+              <button class="btn-entregar"
+                      type="submit"
+                      onclick="return confirm('¿Confirmar la entrega? Se descontarán los materiales del inventario.')">
+                Entregar
+              </button>
+            </form>
+
+            <!-- CANCELAR -->
+            <form th:if="${pedido.estado == 'Pendiente'
+                                     or pedido.estado == 'Aprobado'}"
+                  th:action="@{/pedidos/{id}/estado(id=${pedido.id})}"
+                  method="post">
+
+              <input type="hidden"
+                     name="estado"
+                     value="Cancelado">
+
+              <button class="btn-cancelar"
+                      type="submit"
+                      onclick="return confirm('¿Está seguro de cancelar este pedido?')">
+                Cancelar
+              </button>
+            </form>
+
+            <!-- PEDIDOS FINALIZADOS -->
+            <span class="sin-acciones"
+                  th:if="${pedido.estado == 'Entregado'
+                                      or pedido.estado == 'Cancelado'}">
+                            Sin acciones disponibles
+                        </span>
+
+          </div>
+        </td>
+
+      </tr>
+
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+
+</body>
+</html>

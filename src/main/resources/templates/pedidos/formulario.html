@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Registrar pedido - Inventario Petrolero</title>
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f3f5f7;
+        margin: 0;
+        padding: 40px 15px;
+    }
+
+    .contenedor {
+        max-width: 750px;
+        margin: auto;
+        background: white;
+        padding: 35px;
+        border-radius: 8px;
+    }
+
+    h1 {
+        color: #19375d;
+    }
+
+    p {
+        color: #444;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin-top: 18px;
+        margin-bottom: 7px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 15px;
+    }
+
+    textarea {
+        min-height: 90px;
+    }
+
+    .seccion {
+        margin-top: 25px;
+        padding: 20px;
+        background-color: #f3f5f7;
+        border-radius: 6px;
+    }
+
+    .seccion h2 {
+        color: #19375d;
+        font-size: 20px;
+        margin-top: 0;
+    }
+
+    .botones {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    button, .cancelar {
+        padding: 13px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    button {
+        background-color: #19375d;
+        color: white;
+    }
+
+    button:hover {
+        background-color: #102843;
+    }
+
+    .cancelar {
+        background-color: #ddd;
+        color: #222;
+    }
+
+    .error {
+        color: #c62828;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .mensaje-error {
+        background-color: #fdecea;
+        color: #b71c1c;
+        padding: 12px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .mensaje-error p {
+        color: #b71c1c;
+        margin: 5px 0;
+    }
+
+    .ayuda {
+        color: #666;
+        font-size: 13px;
+        margin-top: 7px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+  <h1>Registrar pedido de materiales</h1>
+
+  <p>
+    Complete la información de la solicitud
+    para operaciones petroleras.
+  </p>
+
+  <form th:action="@{/pedidos/guardar}"
+        th:object="${pedido}"
+        method="post">
+
+    <!-- Mensajes generales de validación -->
+    <div class="mensaje-error"
+         th:if="${#fields.hasGlobalErrors()}">
+
+      <p th:each="error : ${#fields.globalErrors()}"
+         th:text="${error}">
+      </p>
+
+    </div>
+
+    <input type="hidden" th:field="*{id}">
+
+    <!-- SOLICITANTE -->
+    <label for="solicitante">
+      Nombre del solicitante
+    </label>
+
+    <input type="text"
+           id="solicitante"
+           th:field="*{solicitante}"
+           placeholder="Ejemplo: Juan Pérez"
+           required>
+
+    <div class="error"
+         th:if="${#fields.hasErrors('solicitante')}"
+         th:errors="*{solicitante}">
+    </div>
+
+    <!-- ÁREA DE TRABAJO -->
+    <label for="areaTrabajo">
+      Área de trabajo
+    </label>
+
+    <select id="areaTrabajo"
+            th:field="*{areaTrabajo}"
+            required>
+
+      <option value="">Seleccione un área</option>
+      <option value="Perforación">Perforación</option>
+      <option value="Producción">Producción</option>
+      <option value="Mantenimiento">Mantenimiento</option>
+      <option value="Logística">Logística</option>
+      <option value="Operaciones">Operaciones</option>
+
+    </select>
+
+    <div class="error"
+         th:if="${#fields.hasErrors('areaTrabajo')}"
+         th:errors="*{areaTrabajo}">
+    </div>
+
+    <!-- FECHA -->
+    <label for="fechaPedido">
+      Fecha del pedido
+    </label>
+
+    <input type="date"
+           id="fechaPedido"
+           th:field="*{fechaPedido}"
+           required>
+
+    <div class="error"
+         th:if="${#fields.hasErrors('fechaPedido')}"
+         th:errors="*{fechaPedido}">
+    </div>
+
+    <!-- ESTADO -->
+    <label for="estado">
+      Estado del pedido
+    </label>
+
+    <select id="estado"
+            th:field="*{estado}"
+            required>
+
+      <option value="">Seleccione un estado</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="Aprobado">Aprobado</option>
+      <option value="Entregado">Entregado</option>
+      <option value="Cancelado">Cancelado</option>
+
+    </select>
+
+    <div class="error"
+         th:if="${#fields.hasErrors('estado')}"
+         th:errors="*{estado}">
+    </div>
+
+    <!-- MATERIALES SOLICITADOS -->
+    <div class="seccion">
+
+      <h2>Material solicitado</h2>
+
+      <p>
+        Seleccione el material del inventario
+        y especifique la cantidad requerida.
+      </p>
+
+      <label for="producto">
+        Seleccionar material
+      </label>
+
+      <select id="producto"
+              th:field="*{detalles[0].producto.id}"
+              required>
+
+        <option value="">
+          Seleccione un material
+        </option>
+
+        <option th:each="producto : ${productos}"
+                th:value="${producto.id}"
+                th:text="${producto.codigo + ' - ' + producto.nombre}">
+        </option>
+
+      </select>
+
+      <label for="cantidad">
+        Cantidad solicitada
+      </label>
+
+      <input type="number"
+             id="cantidad"
+             th:field="*{detalles[0].cantidad}"
+             min="1"
+             placeholder="Ejemplo: 5"
+             required>
+
+      <p class="ayuda">
+        La cantidad solicitada debe ser mayor
+        a cero y no superar el stock disponible.
+      </p>
+
+      <div class="error"
+           th:if="${#fields.hasErrors('detalles[0].cantidad')}"
+           th:errors="*{detalles[0].cantidad}">
+      </div>
+
+      <div class="error"
+           th:if="${#fields.hasErrors('detalles[0].producto')}"
+           th:errors="*{detalles[0].producto}">
+      </div>
+
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <label for="observacion">
+      Observaciones
+    </label>
+
+    <textarea id="observacion"
+              th:field="*{observacion}"
+              placeholder="Ingrese detalles adicionales del pedido">
+        </textarea>
+
+    <!-- BOTONES -->
+    <div class="botones">
+
+      <button type="submit">
+        Guardar pedido
+      </button>
+
+      <a class="cancelar"
+         th:href="@{/pedidos}">
+        Cancelar
+      </a>
+
+    </div>
+
+  </form>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Materiales</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .contenedor {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            color: #17365d;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        .error {
+            color: #c62828;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .botones {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button, .cancelar {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        button {
+            background: #17365d;
+            color: white;
+        }
+
+        .cancelar {
+            background: #ddd;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1 th:text="${producto.id == null}
+        ? 'Registrar material petrolero'
+        : 'Editar material petrolero'">
+        Registro de materiales
+    </h1>
+
+    <p>Complete la información del material.</p>
+
+    <form th:action="@{/productos/guardar}"
+          th:object="${producto}"
+          method="post">
+
+        <input type="hidden" th:field="*{id}">
+
+        <label for="codigo">Código del material</label>
+        <input type="text" id="codigo" th:field="*{codigo}"
+               placeholder="Ejemplo: PER-001" required>
+        <div class="error" th:if="${#fields.hasErrors('codigo')}"
+             th:errors="*{codigo}"></div>
+
+        <label for="nombre">Nombre del material</label>
+        <input type="text" id="nombre" th:field="*{nombre}"
+               placeholder="Ejemplo: Broca PDC" required>
+        <div class="error" th:if="${#fields.hasErrors('nombre')}"
+             th:errors="*{nombre}"></div>
+
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" th:field="*{descripcion}"
+                  rows="3"></textarea>
+
+        <label for="categoria">Categoría</label>
+        <select id="categoria" th:field="*{categoria}" required>
+            <option value="">Seleccione una categoría</option>
+            <option value="Perforación">Perforación</option>
+            <option value="Cementación">Cementación</option>
+            <option value="Producción">Producción</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+        </select>
+        <div class="error" th:if="${#fields.hasErrors('categoria')}"
+             th:errors="*{categoria}"></div>
+
+        <label for="cantidad">Cantidad disponible</label>
+        <input type="number" id="cantidad" th:field="*{cantidad}"
+               min="0" required>
+        <div class="error" th:if="${#fields.hasErrors('cantidad')}"
+             th:errors="*{cantidad}"></div>
+
+        <label for="stockMinimo">Stock mínimo</label>
+        <input type="number" id="stockMinimo" th:field="*{stockMinimo}"
+               min="0" required>
+        <div class="error" th:if="${#fields.hasErrors('stockMinimo')}"
+             th:errors="*{stockMinimo}"></div>
+
+        <label for="precioUnitario">Precio unitario (USD)</label>
+        <input type="number" id="precioUnitario"
+               th:field="*{precioUnitario}"
+               min="0.01" step="0.01" required>
+        <div class="error" th:if="${#fields.hasErrors('precioUnitario')}"
+             th:errors="*{precioUnitario}"></div>
+
+        <div class="botones">
+            <button type="submit">Guardar material</button>
+            <a class="cancelar" th:href="@{/productos}">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
+
+
